@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MetaData>
+  <VehicleTypes>
+    <VehicleType id="1" name="Car" />
+    <VehicleType id="2" name="Bicycle" />
+    <VehicleType id="3" name="Train" />
+    <VehicleType id="99" name="Unknown" />
+  </VehicleTypes>
+</MetaData>
