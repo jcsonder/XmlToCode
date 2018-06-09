@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace XmlToCode
@@ -13,16 +14,11 @@ namespace XmlToCode
 
         private IList<VehicleTypeDto> GetVehicleTypes(XDocument xml)
         {
-            List<VehicleTypeDto> vehicleTypes = new List<VehicleTypeDto>();
-
-            foreach (XElement item in xml.Root
+            return xml.Root
                 .Elements("VehicleTypes")
-                .Elements("VehicleType"))
-            {
-                vehicleTypes.Add(new VehicleTypeDto(int.Parse(item.Attribute("id").Value), item.Attribute("name").Value));
-            }
-
-            return vehicleTypes;
+                .Elements("VehicleType")
+                .Select(x => new VehicleTypeDto(int.Parse(x.Attribute("id").Value), x.Attribute("name").Value))
+                .ToList();
         }
     }
 }
