@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 
 namespace XmlToCode
@@ -19,23 +18,38 @@ namespace XmlToCode
             _namespaceName = namespaceName;
         }
 
-        public void CreateClass(string typeName, IList<VehicleTypeDto> vehicleTypes)
+        public string CreateClass(string typeName, IList<VehicleTypeDto> vehicleTypes)
         {
+            SyntaxFactory.Comment("Generated code");
+            
             // Create a namespace
             var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(_namespaceName)).NormalizeWhitespace();
 
             // Add System using statement
-            //@namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
+            @namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.CodeDom.Compiler")));
 
             //  Create a class
             var classDeclaration = SyntaxFactory.ClassDeclaration(typeName);
+
+            // add GeneratedCodeAttribute attribute
+            classDeclaration = classDeclaration.AddAttributeLists(SyntaxFactory.AttributeList(
+                SyntaxFactory.SingletonSeparatedList<AttributeSyntax>(
+                    SyntaxFactory.Attribute(
+                        SyntaxFactory.IdentifierName("GeneratedCodeAttribute"), 
+                        SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList<AttributeArgumentSyntax>(
+                            new SyntaxNodeOrToken[]
+                            {
+                                SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(GetType().Name))),
+                                SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("0.0.0.1")))
+                            }))))));
 
             // Add the public modifier
             classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
             // Inherit Enumeration
             classDeclaration = classDeclaration.AddBaseListTypes(
-                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("Enumeration")));
+                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName($"Enumeration<{typeName}>")));
 
             // Create members
             foreach (var vehicleType in vehicleTypes)
@@ -84,8 +98,7 @@ namespace XmlToCode
                 .NormalizeWhitespace()
                 .ToFullString();
 
-            // Output new code to the console.
-            Console.WriteLine(code);
+            return code;
         }
     }
 }
