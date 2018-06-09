@@ -8,5 +8,6 @@
     <VehicleType id="4" name="Plane" />
     <VehicleType id="5" name="Rocket" />
     <VehicleType id="6" name="Tank" />
+    <VehicleType id="7" name="Skates" />
   </VehicleTypes>
 </MetaData>

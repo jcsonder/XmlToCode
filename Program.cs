@@ -21,15 +21,16 @@ namespace RoslynXmlToCode
             // Generate enumeration class
             Console.WriteLine("### generate class");
             string className = "VehicleType";
-            var code = new CodeGenerator(Assembly.GetEntryAssembly().GetName().Name)
+            string code = new CodeGenerator(Assembly.GetEntryAssembly().GetName().Name)
                 .CreateClass(className, vehicleTypes);
             Console.WriteLine(code);
 
-            Console.WriteLine("### save file");
+            Console.WriteLine("### add file to project");
             new ProjectAppender().
                 AddFile(className, code);
 
             Console.WriteLine("### output new class");
+            // Output contains not the latest generated file! Project needs to be reloaded!
             // todo: Doesn't work if code is generated with errors or the file doesn't exist
             VehicleType.GetAll().ToList().ForEach(x => Console.WriteLine(x));
 

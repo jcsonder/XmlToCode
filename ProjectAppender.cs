@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 
 namespace XmlToCode
@@ -11,8 +10,6 @@ namespace XmlToCode
             // todo: Ensure folder is correct!
             string pathLevelAdjustment = "..\\..\\";
             string workingDirectory = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), pathLevelAdjustment));
-            Console.WriteLine($"workingDirectory={workingDirectory}");
-
             string generatedClassFileName = $"{className}.cs";
             string targetFilePath = Path.Combine(workingDirectory, generatedClassFileName);
 
@@ -21,7 +18,6 @@ namespace XmlToCode
             {
                 File.WriteAllText(targetFilePath, code);
 
-                Console.WriteLine("### add file to csproj");
                 // todo: 
                 // Add cs file to csproj
                 // https://stackoverflow.com/questions/18544354/how-to-programmatically-include-a-file-in-my-project
@@ -35,11 +31,11 @@ namespace XmlToCode
         {
             // todo: get csproj file name dynamically
             // Error in Microsoft.Build: InternalErrorException: https://github.com/Microsoft/msbuild/issues/1889 --> Solution: Install-Package Microsoft.Build.Utilities.Core -Version 15.1.1012
-            var p = new Microsoft.Build.Evaluation.Project(Path.Combine(workingDirectory, "XmlToCode.csproj"));
-            if (p.Items.FirstOrDefault(i => i.EvaluatedInclude == generatedClassFileName) == null)
+            var project = new Microsoft.Build.Evaluation.Project(Path.Combine(workingDirectory, "XmlToCode.csproj"));
+            if (project.Items.FirstOrDefault(i => i.EvaluatedInclude == generatedClassFileName) == null)
             {
-                p.AddItem("Compile", generatedClassFileName);
-                p.Save();
+                project.AddItem("Compile", generatedClassFileName);
+                project.Save();
             }
         }
     }

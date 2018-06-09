@@ -12,6 +12,7 @@ namespace XmlToCode
         public static readonly VehicleType Plane = new VehicleType(4, "Plane");
         public static readonly VehicleType Rocket = new VehicleType(5, "Rocket");
         public static readonly VehicleType Tank = new VehicleType(6, "Tank");
+        public static readonly VehicleType Skates = new VehicleType(7, "Skates");
         public VehicleType()
         {
         }
