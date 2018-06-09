@@ -7,31 +7,36 @@
 
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     class Program
     {
         static void Main(string[] args)
         {
+            // Get input data
             XDocument xml = XDocument.Load("MetaData.xml");
             List<VehicleTypeDto> vehicleTypes = GetVehicleTypes(xml);
-            ConsoleWrite(vehicleTypes);
+            Console.WriteLine("### input data");
+            vehicleTypes.ForEach(x => Console.WriteLine(x));
+            Console.WriteLine();
 
             // Goal: Generate a class like VehicleType from MetaData.xml resp. VehicleTypeDto
-
-            VehicleType car = VehicleType.Car;
-            Console.WriteLine(car);
-
-            CreateClass();
+            Console.WriteLine("### generated class");
+            CreateClass(vehicleTypes);
 
             // https://stackoverflow.com/questions/18544354/how-to-programmatically-include-a-file-in-my-project
             // Add cs file to csproj
 
+            ////VehicleType car = VehicleType.Car;
+            ////Console.WriteLine(car);
+
             Console.ReadLine();
         }
 
+        // Code to SyntaxFactory code: http://roslynquoter.azurewebsites.net/
         // https://carlos.mendible.com/2017/03/02/create-a-class-with-net-core-and-roslyn/
         // https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Syntax-Transformation
-        private static void CreateClass()
+        private static void CreateClass(IList<VehicleTypeDto> vehicleTypes)
         {
             string currentAssemblyNamespace = Assembly.GetEntryAssembly().GetName().Name;
 
@@ -39,7 +44,7 @@
             var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(currentAssemblyNamespace)).NormalizeWhitespace();
 
             // Add System using statement
-            @namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
+            //@namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 
             //  Create a class
             var classDeclaration = SyntaxFactory.ClassDeclaration("VehicleType");
@@ -51,13 +56,21 @@
             classDeclaration = classDeclaration.AddBaseListTypes(
                 SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("Enumeration")));
 
-            // Create a string variable
-            //var carVariableDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("VehicleType"))
-            //    .AddVariables(SyntaxFactory.VariableDeclarator("Car"));
-            //var carFieldDeclaration = SyntaxFactory.FieldDeclaration(carVariableDeclaration)
-            //    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword), SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-            //classDeclaration = classDeclaration.AddMembers(carFieldDeclaration);
-            
+            // Create members
+            var memberX = SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("VehicleType"))
+                    .WithVariables(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("Car"))
+                        .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ObjectCreationExpression(SyntaxFactory.IdentifierName("VehicleType"))
+                            .WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                new SyntaxNodeOrToken[]
+                                {
+                                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(1))),
+                                    SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Car")))
+                                }))))))))
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword), SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+            classDeclaration = classDeclaration.AddMembers(memberX);
+
+
             var ctor1 = SyntaxFactory.ConstructorDeclaration("VehicleType")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                 .WithBody(SyntaxFactory.Block());
@@ -90,14 +103,6 @@
 
             // Output new code to the console.
             Console.WriteLine(code);
-        }
-
-        private static void ConsoleWrite(List<VehicleTypeDto> vehicleTypes)
-        {
-            foreach (VehicleTypeDto vehicleType in vehicleTypes)
-            {
-                Console.WriteLine(vehicleType);
-            }
         }
 
         private static List<VehicleTypeDto> GetVehicleTypes(XDocument xml)
