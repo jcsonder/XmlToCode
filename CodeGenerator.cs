@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 
 namespace XmlToCode
@@ -19,11 +18,13 @@ namespace XmlToCode
             _namespaceName = namespaceName;
         }
 
-        public void CreateClass(string typeName, IList<VehicleTypeDto> vehicleTypes)
+        public string CreateClass(string typeName, IList<VehicleTypeDto> vehicleTypes)
         {
+            // todo: Add comment/attribute: Generated code
+
             // Create a namespace
             var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(_namespaceName)).NormalizeWhitespace();
-
+            
             // Add System using statement
             //@namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 
@@ -84,8 +85,7 @@ namespace XmlToCode
                 .NormalizeWhitespace()
                 .ToFullString();
 
-            // Output new code to the console.
-            Console.WriteLine(code);
+            return code;
         }
     }
 }
