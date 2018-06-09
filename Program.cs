@@ -30,7 +30,8 @@ namespace RoslynXmlToCode
             string pathLevelAdjustment = "..\\..\\";
             string workingDirectory = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), pathLevelAdjustment));
             Console.WriteLine($"workingDirectory={workingDirectory}");
-            File.WriteAllText(Path.Combine(workingDirectory, $"{className}.cs"), code);
+            string generatedClassFileName = $"{className}.cs";
+            File.WriteAllText(Path.Combine(workingDirectory, generatedClassFileName), code);
 
             // todo: 
             // Add cs file to csproj
@@ -42,8 +43,8 @@ namespace RoslynXmlToCode
             var p = new Microsoft.Build.Evaluation.Project(Path.Combine(workingDirectory, "XmlToCode.csproj"));
             // todo: Add only if not already existing: Folder & file
             p.AddItem("Folder", @"C:\projects\BabDb\test\test2");
-            ////p.AddItem("Compile", @"C:\projects\BabDb\test\test2\Class1.cs");
-            ////p.Save();
+            p.AddItem("Compile", Path.Combine(workingDirectory, generatedClassFileName));
+            p.Save();
 
             // todo: work with generated class: output
             ////VehicleType car = VehicleType.Car;
