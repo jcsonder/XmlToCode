@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Xml.Linq;
 
     using Microsoft.CodeAnalysis;
@@ -32,48 +33,52 @@
         // https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Syntax-Transformation
         private static void CreateClass()
         {
-            // Create a namespace: (namespace CodeGenerationSample)
-            var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("MyNamespace")).NormalizeWhitespace();
+            string currentAssemblyNamespace = Assembly.GetEntryAssembly().GetName().Name;
 
-            // Add System using statement: (using System)
+            // Create a namespace
+            var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(currentAssemblyNamespace)).NormalizeWhitespace();
+
+            // Add System using statement
             @namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 
-            //  Create a class: (class Order)
-            var classDeclaration = SyntaxFactory.ClassDeclaration("Order");
+            //  Create a class
+            var classDeclaration = SyntaxFactory.ClassDeclaration("VehicleType");
 
-            // Add the public modifier: (public class Order)
+            // Add the public modifier
             classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
-            // Inherit BaseEntity<T> and implement IHaveIdentity: (public class Order : BaseEntity<T>, IHaveIdentity)
+            // Inherit Enumeration
             classDeclaration = classDeclaration.AddBaseListTypes(
-                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("BaseEntity<Order>")),
-                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IHaveIdentity")));
+                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("Enumeration")));
 
-            // Create a string variable: (bool canceled;)
-            var variableDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("bool"))
-                .AddVariables(SyntaxFactory.VariableDeclarator("canceled"));
-
-            // Create a field declaration: (private bool canceled;)
-            var fieldDeclaration = SyntaxFactory.FieldDeclaration(variableDeclaration)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
-
-            // Create a Property: (public int Quantity { get; set; })
-            var propertyDeclaration = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName("int"), "Quantity")
+            // Create a string variable
+            //var carVariableDeclaration = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("VehicleType"))
+            //    .AddVariables(SyntaxFactory.VariableDeclarator("Car"));
+            //var carFieldDeclaration = SyntaxFactory.FieldDeclaration(carVariableDeclaration)
+            //    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword), SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+            //classDeclaration = classDeclaration.AddMembers(carFieldDeclaration);
+            
+            var ctor1 = SyntaxFactory.ConstructorDeclaration("VehicleType")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+                .WithBody(SyntaxFactory.Block());
+            classDeclaration = classDeclaration.AddMembers(ctor1);
 
-            // Create a stament with the body of a method.
-            var syntax = SyntaxFactory.ParseStatement("canceled = true;");
-
-            // Create a method
-            var methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "MarkAsCanceled")
+            var ctor2 = SyntaxFactory.ConstructorDeclaration("VehicleType")
+                .AddParameterListParameters(
+                    SyntaxFactory.Parameter(
+                        SyntaxFactory.Identifier("value"))
+                        .WithType(SyntaxFactory.ParseTypeName("int")),
+                                    SyntaxFactory.Parameter(
+                        SyntaxFactory.Identifier("displayName"))
+                        .WithType(SyntaxFactory.ParseTypeName("string")))
+                .WithInitializer(
+                    SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer)
+                        .AddArgumentListArguments(
+                            SyntaxFactory.Argument(SyntaxFactory.IdentifierName("value")),
+                            SyntaxFactory.Argument(SyntaxFactory.IdentifierName("displayName"))))
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .WithBody(SyntaxFactory.Block(syntax));
-
-            // Add the field, the property and method to the class.
-            classDeclaration = classDeclaration.AddMembers(fieldDeclaration, propertyDeclaration, methodDeclaration);
+                .WithBody(SyntaxFactory.Block());
+            classDeclaration = classDeclaration.AddMembers(ctor2);
 
             // Add the class to the namespace.
             @namespace = @namespace.AddMembers(classDeclaration);
