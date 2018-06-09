@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGenerator.cs" />
+    <Compile Include="VehicleType.cs" />
     <Compile Include="EnumerableExtension.cs" />
     <Compile Include="Enumeration.cs" />
     <Compile Include="TypesService.cs" />
