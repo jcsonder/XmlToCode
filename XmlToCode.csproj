@@ -110,10 +110,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGenerator.cs" />
+    <Compile Include="EnumerableExtension.cs" />
     <Compile Include="Enumeration.cs" />
+    <Compile Include="TypesService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExampleEnum.cs" />
+    <Compile Include="VehicleTypeDto.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
