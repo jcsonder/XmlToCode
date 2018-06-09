@@ -1,9 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <MetaData>
   <VehicleTypes>
+    <VehicleType id="0" name="Undefined" />
     <VehicleType id="1" name="Car" />
     <VehicleType id="2" name="Bicycle" />
     <VehicleType id="3" name="Train" />
-    <VehicleType id="99" name="Unknown" />
+    <VehicleType id="4" name="Plane" />
+    <VehicleType id="5" name="Rocket" />
+    <VehicleType id="6" name="Tank" />
   </VehicleTypes>
 </MetaData>
