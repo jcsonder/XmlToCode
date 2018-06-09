@@ -11,6 +11,7 @@
 
     class Program
     {
+        // Generate an enum class from a MetaData.xml
         static void Main(string[] args)
         {
             // Get input data
@@ -20,13 +21,15 @@
             vehicleTypes.ForEach(x => Console.WriteLine(x));
             Console.WriteLine();
 
-            // Goal: Generate a class like VehicleType from MetaData.xml resp. VehicleTypeDto
+            // Generate enumeration class
             Console.WriteLine("### generated class");
-            CreateClass(vehicleTypes);
+            CreateClass("VehicleType", vehicleTypes);
 
-            // https://stackoverflow.com/questions/18544354/how-to-programmatically-include-a-file-in-my-project
+            // todo: 
             // Add cs file to csproj
+            // https://stackoverflow.com/questions/18544354/how-to-programmatically-include-a-file-in-my-project
 
+            // todo: work with generated class: output
             ////VehicleType car = VehicleType.Car;
             ////Console.WriteLine(car);
 
@@ -36,7 +39,7 @@
         // Code to SyntaxFactory code: http://roslynquoter.azurewebsites.net/
         // https://carlos.mendible.com/2017/03/02/create-a-class-with-net-core-and-roslyn/
         // https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Syntax-Transformation
-        private static void CreateClass(IList<VehicleTypeDto> vehicleTypes)
+        private static void CreateClass(string typeName, IList<VehicleTypeDto> vehicleTypes)
         {
             string currentAssemblyNamespace = Assembly.GetEntryAssembly().GetName().Name;
 
@@ -47,7 +50,7 @@
             //@namespace = @namespace.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 
             //  Create a class
-            var classDeclaration = SyntaxFactory.ClassDeclaration("VehicleType");
+            var classDeclaration = SyntaxFactory.ClassDeclaration(typeName);
 
             // Add the public modifier
             classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
@@ -57,26 +60,28 @@
                 SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("Enumeration")));
 
             // Create members
-            var memberX = SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("VehicleType"))
-                    .WithVariables(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("Car"))
-                        .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ObjectCreationExpression(SyntaxFactory.IdentifierName("VehicleType"))
-                            .WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                                new SyntaxNodeOrToken[]
-                                {
-                                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(1))),
-                                    SyntaxFactory.Token(SyntaxKind.CommaToken),
-                                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Car")))
-                                }))))))))
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword), SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
-            classDeclaration = classDeclaration.AddMembers(memberX);
+            foreach (var vehicleType in vehicleTypes)
+            {
+                var memberX = SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName(typeName))
+                        .WithVariables(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(vehicleType.Name))
+                            .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ObjectCreationExpression(SyntaxFactory.IdentifierName(typeName))
+                                .WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                    new SyntaxNodeOrToken[]
+                                    {
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(vehicleType.Id))),
+                                        SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(vehicleType.Name)))
+                                    }))))))))
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword), SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+                classDeclaration = classDeclaration.AddMembers(memberX);
+            }
 
-
-            var ctor1 = SyntaxFactory.ConstructorDeclaration("VehicleType")
+            var ctor1 = SyntaxFactory.ConstructorDeclaration(typeName)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                 .WithBody(SyntaxFactory.Block());
             classDeclaration = classDeclaration.AddMembers(ctor1);
 
-            var ctor2 = SyntaxFactory.ConstructorDeclaration("VehicleType")
+            var ctor2 = SyntaxFactory.ConstructorDeclaration(typeName)
                 .AddParameterListParameters(
                     SyntaxFactory.Parameter(
                         SyntaxFactory.Identifier("value"))
